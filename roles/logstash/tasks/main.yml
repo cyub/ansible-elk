@@ -1,0 +1,22 @@
+---
+- name: Install Logstash.
+  package:
+    name: logstash
+    state: present
+
+- name: Create Logstash configuration files.
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - nginx-access-log.conf
+  notify: restart logstash
+
+- name: Ensure Logstash is started and enabled on boot.
+  service:
+    name: logstash
+    state: started
+    enabled: true

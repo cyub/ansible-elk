@@ -1,0 +1,13 @@
+---
+- name: Install Nginx, Redis, Filebeat, Elk
+  hosts: elk
+  remote_user: "root"
+
+  roles:
+    - nginx
+    - redis
+    - filebeat
+    - java
+    - elasticsearch
+    - logstash
+    - kibana

@@ -1,0 +1,17 @@
+---
+- name: Check if redis-server is installed.
+  command: "which redis-server"
+  changed_when: false
+  failed_when: false
+  register: redis_installed
+
+- name: Install redis-server
+  apt: name=redis-server state=present
+  when: redis_installed.rc != 0
+
+- name: Updating redis config to save aof file
+  lineinfile:
+   destfile: /etc/redis/redis.conf
+   regexp: 'appendonly no'
+   line: 'appendonly yes'
+  notify: restart redis

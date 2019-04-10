@@ -1,0 +1,35 @@
+---
+- name: Add Filebeat apt key
+  apt_key:
+   url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+   state: present
+
+- name: Adding Filebeat repo
+  apt_repository:
+   repo: deb https://artifacts.elastic.co/packages/6.x/apt stable main
+   state: present
+
+- name: Install Filebeat with apt
+  apt:
+   name: filebeat
+   update_cache: yes
+
+- name: Starting Filebeat
+  service:
+   name: filebeat
+   state: started
+
+- name: Enable nginx module
+  copy:
+    src: /etc/filebeat/modules.d/{{ item }}.yml.disabled
+    dest: /etc/filebeat/modules.d/{{ item }}.yml
+    remote_src: true
+  with_items:
+    - nginx
+  notify:
+    - restart filebeat
+
+- name: Create Filebeat configuration files 
+  template: src=templates/filebeat.yml.j2 dest=/etc/filebeat/filebeat.yml
+  notify:
+    - restart filebeat

@@ -1,0 +1,10 @@
+---
+- name: Check if Nginx is installed.
+  command: "which nginx"
+  changed_when: false
+  failed_when: false
+  register: nginx_installed
+
+- name: Install nginx
+  apt: name=nginx state=present update_cache=yes
+  when: nginx_installed.rc != 0

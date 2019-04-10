@@ -1,0 +1,41 @@
+input {
+    redis {
+        port => "6379"
+        key => "filebeat"   
+        data_type => "list"
+        threads => "5"
+        db => "0"
+    }
+}
+
+filter {
+ grok {
+   match => [ "message" , "%{COMBINEDAPACHELOG}"]
+   overwrite => [ "message" ]
+ }
+ mutate {
+   convert => ["response", "integer"]
+   convert => ["bytes", "integer"]
+   convert => ["responsetime", "float"]
+ }
+ geoip {
+   source => "clientip"
+   target => "geoip"
+ }
+ date {
+   match => [ "timestamp" , "dd/MMM/YYYY:HH:mm:ss Z" ]
+   remove_field => [ "timestamp" ]
+ }
+ useragent {
+   source => "agent"
+ }
+}
+
+output {
+ stdout { codec => rubydebug }
+ elasticsearch {
+        hosts => ["localhost:9200"]
+        index => "logstash-%{+YYYY.MM.dd}"
+        document_type => "%{[@metadata][type]}"
+    }
+}
